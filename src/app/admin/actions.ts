@@ -2,8 +2,10 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { updateCalendarEventStatus } from "@/lib/calendar";
 import { requireAuth } from "@/lib/auth-guard";
+import { PrismaAppointmentRepository } from "@/infrastructure/prisma/prisma-appointment.repository";
+import { AppointmentService } from "@/domain/appointment/appointment.service";
+import { CalendarServiceImpl } from "@/infrastructure/calendar/calendar-service.impl";
 import {
 	createBarberSchema,
 	updateBarberSchema,
@@ -11,6 +13,7 @@ import {
 	updateServiceSchema,
 	updateAppointmentStatusSchema,
 } from "@/lib/validations";
+import type { AppointmentStatus } from "@/domain/appointment/value-objects";
 
 // ── Barberos ───────────────────────────────
 
@@ -95,20 +98,25 @@ export async function deleteService(id: string) {
 
 // ── Turnos ─────────────────────────────────
 
+const appointmentService = new AppointmentService(
+	new PrismaAppointmentRepository(),
+	new CalendarServiceImpl(),
+);
+
 export async function updateAppointmentStatus(id: string, status: string) {
 	await requireAuth(["ADMIN", "SUPER_ADMIN"]);
 	const parsed = updateAppointmentStatusSchema.parse({ id, status });
 
-	const appointment = await prisma.appointment.update({
-		where: { id: parsed.id },
-		data: { status: parsed.status },
+	const result = await appointmentService.updateStatus({
+		appointmentId: parsed.id,
+		status: parsed.status as AppointmentStatus,
 	});
 
-	// Actualizar color en Google Calendar
-	if (appointment.googleCalendarEventId) {
-		await updateCalendarEventStatus(
-			appointment.googleCalendarEventId,
-			parsed.status,
+	if (!result.ok) {
+		throw new Error(
+			result.error instanceof Error
+				? result.error.message
+				: "Error al actualizar el turno",
 		);
 	}
 
