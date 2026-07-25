@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== USUARIOS (clientes + admins) ====================
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  phone     String?
+  password  String?              // Solo para admins (creados por seed)
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointments      Appointment[]
+  pushSubscriptions PushSubscription[]
+}
+
+enum UserRole {
+  CLIENT
+  ADMIN
+  SUPER_ADMIN
+}
+
+// ==================== CONFIGURACIÓN GLOBAL ====================
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+// ==================== BARBEROS ====================
+model Barber {
+  id          String   @id @default(cuid())
+  name        String
+  email       String?  @unique
+  phone       String?
+  bio         String?              // Frase corta / descripción personal
+  specialties String?              // Ej: "Degradados, Barba, Cortes clásicos"
+  experience  Int?                 // Años de experiencia
+  instagram   String?              // @usuario de Instagram
+  photo       String?
+  isActive    Boolean  @default(true)
+  color       String   @default("#3B82F6")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  services     BarberService[]
+  availability Availability[]
+  appointments Appointment[]
+}
+
+// ==================== SERVICIOS ====================
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  duration    Int      // duración en minutos
+  price       Decimal  @db.Decimal(10, 2)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  barbers      BarberService[]
+  appointments Appointment[]
+}
+
+// ==================== RELACIÓN BARBERO ↔ SERVICIO (N:N) ====================
+model BarberService {
+  barberId  String
+  serviceId String
+  barber    Barber  @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([barberId, serviceId])
+}
+
+// ==================== DISPONIBILIDAD SEMANAL ====================
+model Availability {
+  id        String   @id @default(cuid())
+  barberId  String
+  dayOfWeek Int      // 0=Domingo, 1=Lunes ... 6=Sábado
+  startTime String   // "09:00"
+  endTime   String   // "18:00"
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  barber Barber @relation(fields: [barberId], references: [id], onDelete: Cascade)
+
+  @@unique([barberId, dayOfWeek])
+}
+
+// ==================== GALERÍA DE IMÁGENES ====================
+model GalleryImage {
+  id        String   @id @default(cuid())
+  src       String   // Ruta del archivo: /images/gallery/file.jpg
+  alt       String   @default("")
+  mediaType String   @default("IMAGE") // "IMAGE" | "VIDEO"
+  order     Int      @default(0)
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ==================== PUSH SUBSCRIPTIONS ====================
+model PushSubscription {
+  id            String   @id @default(cuid())
+  userId        String
+  endpoint      String   @unique
+  authKey       String
+  p256dhKey     String
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ==================== TURNOS ====================
+model Appointment {
+  id          String   @id @default(cuid())
+  barberId    String
+  serviceId   String
+  userId      String?              // Cliente logueado (opcional)
+  clientName  String
+  clientPhone String
+  clientEmail String?
+  date        DateTime             // Inicio del turno
+  endTime     DateTime             // Fin del turno
+  status      AppointmentStatus @default(PENDING)
+  notes       String?
+  cancelToken          String   @unique     // Token para cancelar (desde perfil)
+  googleCalendarEventId String?              // ID del evento en Google Calendar
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  barber  Barber  @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([barberId, date])
+  @@index([userId])
+  @@index([cancelToken])
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}

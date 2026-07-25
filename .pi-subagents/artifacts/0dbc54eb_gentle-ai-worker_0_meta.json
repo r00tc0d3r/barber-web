@@ -1,0 +1,102 @@
+{
+  "runId": "0dbc54eb",
+  "agent": "gentle-ai-worker",
+  "task": "## Task: Implementar Domain Layer para barber-web\n\nNecesito que crees la capa de dominio para el proyecto barber-web. Esta es la foundation para todos los refactors posteriores.\n\n### Contexto del Proyecto\nEs una barbería web con turnos (appointments), barberos, servicios. Stack: Next.js 16, React 19, Prisma 7, Neon PostgreSQL.\n\n### Archivos a Crear\n\n#### 1. `src/domain/shared/result.ts`\nImplementar Result type (Either pattern) para manejo de errores controlado:\n```typescript\ntype Result<T, E> = { ok: true; value: T } | { ok: false; error: E };\n\n// Helpers: ok(), err(), isOk(), isErr()\n```\n\n#### 2. `src/domain/shared/error.ts`\nCrear base error classes:\n```typescript\nclass DomainError extends Error {\n  code: string;\n  statusCode: number;\n}\n\n// Subclasses: ValidationError, NotFoundError, UnauthorizedError, ConflictError\n```\n\n#### 3. `src/domain/appointment/appointment.ts`\nEntity con invariantes de dominio:\n```typescript\n// Value Objects: AppointmentId, BarberId, ServiceId, AppointmentDate, AppointmentStatus\n// Entity: Appointment con invariantes:\n//   - date debe ser futuro\n//   - endTime > date\n//   - status transitions válidas (PENDING -> CONFIRMED -> IN_PROGRESS -> COMPLETED)\n//   - cancel solo desde PENDING o CONFIRMED\n```\n\n#### 4. `src/domain/appointment/appointment.service.ts`\nUse cases (Application Service):\n```typescript\n// createAppointment(data) -> Result<Appointment, ValidationError | ConflictError>\n//   - Validar disponibilidad\n//   - Verificar race condition\n//   - Crear en DB\n//   - Crear evento en Google Calendar (con retry)\n//\n// cancelAppointment(id) -> Result<Appointment, NotFoundError | ConflictError>\n//   - Validar estado actual\n//   - Actualizar estado\n//   - Actualizar Google Calendar\n//\n// updateAppointmentStatus(id, newStatus) -> Result<Appointment, ...>\n//   - Validar transición de estado\n//   - Actualizar DB y Calendar\n```\n\n#### 5. `src/domain/appointment/appointment.repository.ts`\nInterface (port) para persistencia:\n```typescript\ninterface AppointmentRepository {\n  findById(id: string): Promise<Appointment | null>;\n  findByBarberAndDate(barberId: string, date: Date): Promise<Appointment[]>;\n  create(data: CreateAppointmentData): Promise<Appointment>;\n  update(id: string, data: UpdateAppointmentData): Promise<Appointment>;\n}\n```\n\n#### 6. `src/infrastructure/prisma/prisma-appointment.repository.ts`\nImplementación con Prisma:\n```typescript\nclass PrismaAppointmentRepository implements AppointmentRepository {\n  // Implementar todos los métodos usando Prisma\n}\n```\n\n### Reglas\n- Todo en TypeScript estricto\n- Sin `any` types\n- Usar Result type en vez de throws para errores de dominio\n- Invariantes validadas en el dominio, no en la UI\n- Repository pattern para abstraer Prisma\n- Seguir convenciones del proyecto existente\n\n### Directorio de Trabajo\n/Users/k3l0d3v/Projects/barber-web\n\n### Evidence Required\n- Archivos creados con su contenido\n- Verificar que compila sin errores de TypeScript",
+  "exitCode": 1,
+  "usage": {
+    "input": 1130,
+    "output": 357,
+    "cacheRead": 20352,
+    "cacheWrite": 0,
+    "cost": 0,
+    "turns": 1
+  },
+  "model": "opencode/mimo-v2.5-free",
+  "attemptedModels": [
+    "opencode/mimo-v2.5-free"
+  ],
+  "modelAttempts": [
+    {
+      "model": "opencode/mimo-v2.5-free",
+      "success": false,
+      "exitCode": 1,
+      "error": "OpenCode attempted to use its own tool (invalid). opencode-pi disables OpenCode tools; use Pi tool-call markers only.",
+      "usage": {
+        "input": 1130,
+        "output": 357,
+        "cacheRead": 20352,
+        "cacheWrite": 0,
+        "cost": 0,
+        "turns": 1
+      }
+    }
+  ],
+  "durationMs": 27941,
+  "toolCount": 0,
+  "error": "OpenCode attempted to use its own tool (invalid). opencode-pi disables OpenCode tools; use Pi tool-call markers only.",
+  "acceptance": {
+    "status": "rejected",
+    "explicit": true,
+    "effectiveAcceptance": {
+      "level": "verified",
+      "explicit": true,
+      "inferredReason": [
+        "write-capable worker/task"
+      ],
+      "criteria": [
+        {
+          "id": "criterion-1",
+          "must": "Implement the requested change without widening scope",
+          "evidence": [
+            "changed-files",
+            "tests-added",
+            "commands-run",
+            "validation-output",
+            "residual-risks",
+            "no-staged-files"
+          ],
+          "severity": "required"
+        }
+      ],
+      "evidence": [
+        "changed-files",
+        "tests-added",
+        "commands-run",
+        "validation-output",
+        "residual-risks",
+        "no-staged-files"
+      ],
+      "verify": [],
+      "stopRules": []
+    },
+    "inferredReason": [
+      "write-capable worker/task"
+    ],
+    "criteria": [
+      {
+        "id": "criterion-1",
+        "must": "Implement the requested change without widening scope",
+        "evidence": [
+          "changed-files",
+          "tests-added",
+          "commands-run",
+          "validation-output",
+          "residual-risks",
+          "no-staged-files"
+        ],
+        "severity": "required"
+      }
+    ],
+    "runtimeChecks": [
+      {
+        "id": "attestation",
+        "status": "failed",
+        "message": "Structured acceptance report not found."
+      }
+    ],
+    "verifyRuns": [],
+    "childReportParseError": "Structured acceptance report not found."
+  },
+  "transcriptPath": "/Users/k3l0d3v/Projects/barber-web/.pi-subagents/artifacts/0dbc54eb_gentle-ai-worker_0_transcript.jsonl",
+  "timestamp": 1784935942716
+}
