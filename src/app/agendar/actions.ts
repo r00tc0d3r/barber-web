@@ -9,11 +9,7 @@ import {
 } from "@/lib/validations";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { headers } from "next/headers";
-
-export type Slot = {
-	time: string;
-	available: boolean;
-};
+import type { Slot } from "@/types/models";
 
 export async function getAvailableSlots(
 	barberId: string,

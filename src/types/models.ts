@@ -77,7 +77,10 @@ export type Slot = {
 // ── Booking wizard ───────────────────────────────────────
 
 /** Barber variant for booking wizard (subset of BarberWithServices) */
-export type BookingBarber = Pick<PrismaBarber, "id" | "name" | "color"> & {
+export type BookingBarber = Pick<
+	PrismaBarber,
+	"id" | "name" | "color" | "specialties"
+> & {
 	services: (PrismaBarberService & {
 		service: Pick<PrismaService, "id" | "name">;
 	})[];

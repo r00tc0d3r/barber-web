@@ -21,10 +21,12 @@ model User {
 
   appointments      Appointment[]
   pushSubscriptions PushSubscription[]
+  barberProfile     Barber?           // Link to barber profile (for BARBER role)
 }
 
 enum UserRole {
   CLIENT
+  BARBER
   ADMIN
   SUPER_ADMIN
 }
@@ -42,6 +44,7 @@ model Barber {
   name        String
   email       String?  @unique
   phone       String?
+  userId      String?  @unique        // Link to User account for barber login
   bio         String?              // Frase corta / descripción personal
   specialties String?              // Ej: "Degradados, Barba, Cortes clásicos"
   experience  Int?                 // Años de experiencia
@@ -55,6 +58,8 @@ model Barber {
   services     BarberService[]
   availability Availability[]
   appointments Appointment[]
+
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 // ==================== SERVICIOS ====================

@@ -7,6 +7,7 @@ export default defineConfig({
 		environment: "node",
 		include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
 		exclude: ["node_modules", "src/__tests__/e2e"],
+		setupFiles: ["./src/test-setup.ts"],
 	},
 	resolve: {
 		alias: {

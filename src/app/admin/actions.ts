@@ -104,7 +104,24 @@ const appointmentService = new AppointmentService(
 );
 
 export async function updateAppointmentStatus(id: string, status: string) {
-	await requireAuth(["ADMIN", "SUPER_ADMIN"]);
+	await requireAuth(["ADMIN", "SUPER_ADMIN", "BARBER"]);
+
+	// Si es BARBER, verificar que el turno le pertenece
+	const session = await import("@/lib/auth").then((m) => m.auth());
+	if (session?.user?.role === "BARBER" && session.user.id) {
+		const barber = await prisma.barber.findFirst({
+			where: { userId: session.user.id },
+		});
+		if (!barber) throw new Error("No se encontró perfil de barbero");
+
+		const appointment = await prisma.appointment.findUnique({
+			where: { id },
+			select: { barberId: true },
+		});
+		if (!appointment || appointment.barberId !== barber.id) {
+			throw new Error("No autorizado para modificar este turno");
+		}
+	}
 	const parsed = updateAppointmentStatusSchema.parse({ id, status });
 
 	const result = await appointmentService.updateStatus({

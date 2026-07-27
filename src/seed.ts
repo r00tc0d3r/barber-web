@@ -16,160 +16,206 @@ const prisma = new PrismaClient({ adapter });
 const rl = readline.createInterface({ input, output });
 
 async function ask(question: string, defaultValue?: string): Promise<string> {
-  const defaultMsg = defaultValue ? ` (${defaultValue})` : "";
-  const answer = await rl.question(`  ${question}${defaultMsg}: `);
-  return answer.trim() || defaultValue || "";
+	const defaultMsg = defaultValue ? ` (${defaultValue})` : "";
+	const answer = await rl.question(`  ${question}${defaultMsg}: `);
+	return answer.trim() || defaultValue || "";
 }
 
 async function main() {
-  console.log("\n🚀  Barber Web — Seed\n");
+	console.log("\n🚀  Barber Web — Seed\n");
 
-  // ── Admin ───────────────────────────────────
-  console.log("📋  Usuario administrador");
+	// ── Admin ───────────────────────────────────
+	console.log("📋  Usuario administrador");
 
-  const email =
-    process.env.SEED_ADMIN_EMAIL || (await ask("Email", "admin@barberia.com"));
-  const name =
-    process.env.SEED_ADMIN_NAME || (await ask("Nombre", "Admin"));
-  const password =
-    process.env.SEED_ADMIN_PASSWORD || (await ask("Contraseña", "admin123"));
+	const email =
+		process.env.SEED_ADMIN_EMAIL || (await ask("Email", "admin@barberia.com"));
+	const name = process.env.SEED_ADMIN_NAME || (await ask("Nombre", "Admin"));
+	const password =
+		process.env.SEED_ADMIN_PASSWORD || (await ask("Contraseña", "admin123"));
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+	const existingUser = await prisma.user.findUnique({ where: { email } });
 
-  if (existingUser) {
-    console.log(`  ⚠️  Ya existe "${email}" — omitiendo`);
-  } else {
-    const hashedPassword = await hash(password, 12);
-    await prisma.user.create({
-      data: { email, name, password: hashedPassword, role: "ADMIN" },
-    });
-    console.log(`  ✅  Admin creado: ${email} / ${password}`);
-  }
+	if (existingUser) {
+		console.log(`  ⚠️  Ya existe "${email}" — omitiendo`);
+	} else {
+		const hashedPassword = await hash(password, 12);
+		await prisma.user.create({
+			data: { email, name, password: hashedPassword, role: "ADMIN" },
+		});
+		console.log(`  ✅  Admin creado: ${email} / ${password}`);
+	}
 
-  // ── Servicios ───────────────────────────────
-  console.log("\n📋  Servicios");
+	// ── Servicios ───────────────────────────────
+	console.log("\n📋  Servicios");
 
-  const services = [
-    { name: "Corte de pelo", duration: 30, price: 10000 },
-    { name: "Arreglo de barba", duration: 20, price: 7000 },
-    { name: "Corte + Barba", duration: 45, price: 15000 },
-    { name: "Corte infantil", duration: 25, price: 8000 },
-    { name: "Degradado", duration: 40, price: 12000 },
-    { name: "Tinte", duration: 60, price: 25000 },
-  ];
+	const services = [
+		{ name: "Corte de pelo", duration: 30, price: 10000 },
+		{ name: "Arreglo de barba", duration: 20, price: 7000 },
+		{ name: "Corte + Barba", duration: 45, price: 15000 },
+		{ name: "Corte infantil", duration: 25, price: 8000 },
+		{ name: "Degradado", duration: 40, price: 12000 },
+		{ name: "Tinte", duration: 60, price: 25000 },
+	];
 
-  for (const svc of services) {
-    const existing = await prisma.service.findFirst({
-      where: { name: svc.name },
-    });
-    if (!existing) {
-      await prisma.service.create({ data: svc });
-      console.log(`  ✅  "${svc.name}" — $${svc.price}`);
-    } else {
-      console.log(`  ⚠️  "${svc.name}" ya existe`);
-    }
-  }
+	for (const svc of services) {
+		const existing = await prisma.service.findFirst({
+			where: { name: svc.name },
+		});
+		if (!existing) {
+			await prisma.service.create({ data: svc });
+			console.log(`  ✅  "${svc.name}" — $${svc.price}`);
+		} else {
+			console.log(`  ⚠️  "${svc.name}" ya existe`);
+		}
+	}
 
-  // ── Barberos ────────────────────────────────
-  console.log("\n📋  Barberos");
+	// ── Barberos ────────────────────────────────
+	console.log("\n📋  Barberos");
 
-  const barbers = [
-    {
-      name: "Juan Pérez",
-      color: "#3B82F6",
-      specialties: "Degradados, Cortes modernos, Barba",
-      experience: 8,
-      bio: "Especialista en degradados y cortes de tendencia",
-    },
-    {
-      name: "Carlos García",
-      color: "#10B981",
-      specialties: "Cortes clásicos, Barba tradicional, Navaja",
-      experience: 12,
-      bio: "Maestro barbero con experiencia en barbería tradicional",
-    },
-    {
-      name: "María López",
-      color: "#F59E0B",
-      specialties: "Tintes, Mechas, Peinados, Cortes femeninos",
-      experience: 6,
-      bio: "Experta en colorimetría y estilos modernos",
-    },
-  ];
+	const barbers = [
+		{
+			name: "Juan Pérez",
+			color: "#3B82F6",
+			specialties: "Degradados, Cortes modernos, Barba",
+			experience: 8,
+			bio: "Especialista en degradados y cortes de tendencia",
+		},
+		{
+			name: "Carlos García",
+			color: "#10B981",
+			specialties: "Cortes clásicos, Barba tradicional, Navaja",
+			experience: 12,
+			bio: "Maestro barbero con experiencia en barbería tradicional",
+		},
+		{
+			name: "María López",
+			color: "#F59E0B",
+			specialties: "Tintes, Mechas, Peinados, Cortes femeninos",
+			experience: 6,
+			bio: "Experta en colorimetría y estilos modernos",
+		},
+	];
 
-  const allServices = await prisma.service.findMany();
+	const allServices = await prisma.service.findMany();
 
-  for (const barber of barbers) {
-    const existing = await prisma.barber.findFirst({
-      where: { name: barber.name },
-    });
+	for (const barber of barbers) {
+		const existing = await prisma.barber.findFirst({
+			where: { name: barber.name },
+		});
 
-    if (!existing) {
-      const created = await prisma.barber.create({
-        data: {
-          name: barber.name,
-          color: barber.color,
-          bio: barber.bio,
-          specialties: barber.specialties,
-          experience: barber.experience,
-          services: {
-            create: allServices.map((s) => ({ serviceId: s.id })),
-          },
-        },
-      });
-      console.log(`  ✅  "${created.name}"`);
-    } else {
-      console.log(`  ⚠️  "${barber.name}" ya existe`);
-    }
-  }
+		if (!existing) {
+			const created = await prisma.barber.create({
+				data: {
+					name: barber.name,
+					color: barber.color,
+					bio: barber.bio,
+					specialties: barber.specialties,
+					experience: barber.experience,
+					services: {
+						create: allServices.map((s) => ({ serviceId: s.id })),
+					},
+				},
+			});
+			console.log(`  ✅  "${created.name}"`);
+		} else {
+			console.log(`  ⚠️  "${barber.name}" ya existe`);
+		}
+	}
 
-  // ── Disponibilidad ──────────────────────────
-  console.log("\n📋  Disponibilidad");
+	// ── Disponibilidad ──────────────────────────
+	console.log("\n📋  Disponibilidad");
 
-  const allBarbers = await prisma.barber.findMany();
-  const weekDays = [
-    { day: 1, label: "Lunes" },
-    { day: 2, label: "Martes" },
-    { day: 3, label: "Miércoles" },
-    { day: 4, label: "Jueves" },
-    { day: 5, label: "Viernes" },
-    { day: 6, label: "Sábado" },
-  ];
+	const allBarbers = await prisma.barber.findMany();
+	const weekDays = [
+		{ day: 1, label: "Lunes" },
+		{ day: 2, label: "Martes" },
+		{ day: 3, label: "Miércoles" },
+		{ day: 4, label: "Jueves" },
+		{ day: 5, label: "Viernes" },
+		{ day: 6, label: "Sábado" },
+	];
 
-  for (const barber of allBarbers) {
-    for (const { day, label } of weekDays) {
-      const existing = await prisma.availability.findUnique({
-        where: {
-          barberId_dayOfWeek: { barberId: barber.id, dayOfWeek: day },
-        },
-      });
+	for (const barber of allBarbers) {
+		for (const { day, label } of weekDays) {
+			const existing = await prisma.availability.findUnique({
+				where: {
+					barberId_dayOfWeek: { barberId: barber.id, dayOfWeek: day },
+				},
+			});
 
-      if (!existing) {
-        const isSaturday = day === 6;
-        await prisma.availability.create({
-          data: {
-            barberId: barber.id,
-            dayOfWeek: day,
-            startTime: "09:00",
-            endTime: isSaturday ? "13:00" : "18:00",
-          },
-        });
-        console.log(
-          `  ✅  ${barber.name} — ${label} 09:00-${isSaturday ? "13:00" : "18:00"}`,
-        );
-      }
-    }
-  }
+			if (!existing) {
+				const isSaturday = day === 6;
+				await prisma.availability.create({
+					data: {
+						barberId: barber.id,
+						dayOfWeek: day,
+						startTime: "09:00",
+						endTime: isSaturday ? "13:00" : "18:00",
+					},
+				});
+				console.log(
+					`  ✅  ${barber.name} — ${label} 09:00-${isSaturday ? "13:00" : "18:00"}`,
+				);
+			}
+		}
+	}
 
-  console.log("\n🎉  ¡Seed completado!\n");
+	console.log("\n🎉  ¡Seed completado!");
+
+	// ── Usuarios BARBER ─────────────────────────
+	console.log("\n📋  Usuarios BARBER (para login de barberos)");
+
+	const allBarbersNow = await prisma.barber.findMany();
+	for (const barber of allBarbersNow) {
+		if (barber.userId) {
+			console.log(`  ⚠️  ${barber.name} ya tiene usuario vinculado`);
+			continue;
+		}
+
+		const slug = barber.name
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, ".")
+			.replace(/\.$/, "");
+		const barberEmail = `${slug}@barberia.local`;
+		const barberPassword = "barber123";
+
+		const existingUser = await prisma.user.findUnique({
+			where: { email: barberEmail },
+		});
+		let userId: string;
+
+		if (existingUser) {
+			userId = existingUser.id;
+			console.log(`  ⚠️  ${barberEmail} ya existe — reutilizando`);
+		} else {
+			const hashed = await hash(barberPassword, 12);
+			const user = await prisma.user.create({
+				data: {
+					email: barberEmail,
+					name: barber.name,
+					password: hashed,
+					role: "BARBER",
+				},
+			});
+			userId = user.id;
+			console.log(`  ✅  ${barber.name} → ${barberEmail} / ${barberPassword}`);
+		}
+
+		await prisma.barber.update({
+			where: { id: barber.id },
+			data: { userId },
+		});
+	}
+
+	console.log("\n🎉  ¡Seed completado!");
 }
 
 main()
-  .catch((e) => {
-    console.error("\n❌  Error:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    rl.close();
-    await prisma.$disconnect();
-  });
+	.catch((e) => {
+		console.error("\n❌  Error:", e);
+		process.exit(1);
+	})
+	.finally(async () => {
+		rl.close();
+		await prisma.$disconnect();
+	});

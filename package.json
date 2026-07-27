@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "seed": "tsx src/seed.ts"
+    "seed": "tsx src/seed.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -30,9 +31,19 @@
     "ws": "^8.21.0",
     "zod": "^4.4.3"
   },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix --no-warn-ignored"
+    ],
+    "*.{js,mjs}": [
+      "eslint --fix --no-warn-ignored"
+    ]
+  },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -41,6 +52,9 @@
     "@types/ws": "^8.18.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "happy-dom": "^20.11.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.2.0",
     "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",

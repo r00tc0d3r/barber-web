@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { AuthError } from "next-auth";
 
-type AllowedRoles = "ADMIN" | "SUPER_ADMIN";
+type AllowedRoles = "CLIENT" | "BARBER" | "ADMIN" | "SUPER_ADMIN";
 
 /**
  * Server-side guard that validates NextAuth session and optional role.
@@ -22,6 +22,7 @@ export async function requireAuth(allowedRoles?: AllowedRoles[]) {
 
 	if (
 		allowedRoles &&
+		allowedRoles.length > 0 &&
 		!allowedRoles.includes(session.user.role as AllowedRoles)
 	) {
 		throw new AuthError("No autorizado");
