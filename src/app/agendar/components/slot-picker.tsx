@@ -15,14 +15,35 @@ export function SlotPicker({ slots, selected, onSelect }: Props) {
 		);
 	}
 
+	const handleKeyDown = (
+		e: React.KeyboardEvent,
+		time: string,
+		available: boolean,
+	) => {
+		if (!available) return;
+		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
+			onSelect(time);
+		}
+	};
+
 	return (
-		<div className="flex flex-wrap gap-2">
+		<div
+			role="radiogroup"
+			aria-label="Horarios disponibles"
+			className="flex flex-wrap gap-2"
+		>
 			{slots.map((slot) => (
 				<button
 					key={slot.time}
+					role="radio"
+					aria-checked={selected === slot.time}
+					aria-disabled={!slot.available}
+					aria-label={`Horario: ${slot.time}${!slot.available ? ", no disponible" : ""}`}
 					disabled={!slot.available}
 					onClick={() => onSelect(slot.time)}
-					className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+					onKeyDown={(e) => handleKeyDown(e, slot.time, slot.available)}
+					className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 ${
 						selected === slot.time
 							? "border-blue-500 bg-blue-600 text-white"
 							: slot.available

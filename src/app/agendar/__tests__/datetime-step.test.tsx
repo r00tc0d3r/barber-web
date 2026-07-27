@@ -61,7 +61,7 @@ describe("DateTimeStep", () => {
 		expect(onBack).toHaveBeenCalled();
 	});
 
-	it("shows loading state", () => {
+	it("shows loading skeleton", () => {
 		render(
 			<DateTimeStep
 				date="2026-08-01"
@@ -74,7 +74,11 @@ describe("DateTimeStep", () => {
 			/>,
 		);
 
-		expect(screen.getByText("Buscando horarios...")).toBeInTheDocument();
+		const loadingRegion = screen.getByLabelText(
+			"Cargando horarios disponibles",
+		);
+		expect(loadingRegion).toBeInTheDocument();
+		expect(loadingRegion).toHaveAttribute("aria-busy", "true");
 	});
 
 	it("renders slots when available", () => {

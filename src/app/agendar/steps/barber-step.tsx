@@ -28,6 +28,13 @@ export function BarberStep({ barbers, selected, onSelect }: Props) {
 		);
 	};
 
+	const handleKeyDown = (e: React.KeyboardEvent, barber: BookingBarber) => {
+		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
+			onSelect(barber);
+		}
+	};
+
 	return (
 		<div>
 			<h2 className="mb-6 text-xl font-semibold text-white">
@@ -38,12 +45,20 @@ export function BarberStep({ barbers, selected, onSelect }: Props) {
 				selected={selectedSpecialties}
 				onToggle={handleToggle}
 			/>
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			<div
+				role="radiogroup"
+				aria-label="Barberos disponibles"
+				className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+			>
 				{filteredBarbers.map((b) => (
 					<button
 						key={b.id}
+						role="radio"
+						aria-checked={selected === b.id}
+						aria-label={`Barbero: ${b.name}`}
 						onClick={() => onSelect(b)}
-						className={`rounded-xl border bg-neutral-950 p-5 text-left transition-all ${
+						onKeyDown={(e) => handleKeyDown(e, b)}
+						className={`rounded-xl border bg-neutral-950 p-5 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 ${
 							selected === b.id
 								? "border-blue-500"
 								: "border-neutral-800 hover:border-neutral-600 hover:bg-neutral-900"

@@ -19,8 +19,14 @@ export function DoneStep({ result, barber, service, onReset }: Props) {
 	});
 
 	return (
-		<div className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-8 text-center">
-			<div className="mb-4 text-5xl">✅</div>
+		<div
+			role="status"
+			aria-live="polite"
+			className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-8 text-center"
+		>
+			<div className="mb-4 text-5xl" aria-hidden="true">
+				✅
+			</div>
 			<h2 className="text-2xl font-bold text-white">Turno confirmado</h2>
 			<p className="mt-2 text-neutral-400">
 				{barber.name} te espera el{" "}
@@ -32,7 +38,7 @@ export function DoneStep({ result, barber, service, onReset }: Props) {
 			</div>
 			<button
 				onClick={onReset}
-				className="mt-8 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+				className="mt-8 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
 			>
 				Agendar otro turno
 			</button>

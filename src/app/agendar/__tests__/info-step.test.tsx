@@ -29,6 +29,7 @@ describe("InfoStep", () => {
 		phone: "",
 		email: "",
 		onFieldChange: vi.fn(),
+		onBlur: vi.fn(),
 		onSubmit: vi.fn(),
 		onBack: vi.fn(),
 		submitting: false,

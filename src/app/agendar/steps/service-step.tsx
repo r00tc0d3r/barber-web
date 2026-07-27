@@ -20,23 +20,38 @@ export function ServiceStep({
 	const barberServiceIds = new Set(barber.services.map((bs) => bs.serviceId));
 	const barberServices = services.filter((s) => barberServiceIds.has(s.id));
 
+	const handleKeyDown = (e: React.KeyboardEvent, service: BookingService) => {
+		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
+			onSelect(service);
+		}
+	};
+
 	return (
 		<div>
 			<button
 				onClick={onBack}
-				className="mb-4 text-sm text-neutral-500 transition-colors hover:text-white"
+				className="mb-4 text-sm text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
 			>
 				← Cambiar barbero
 			</button>
 			<h2 className="mb-6 text-xl font-semibold text-white">
 				Elegí el servicio
 			</h2>
-			<div className="grid gap-4 sm:grid-cols-2">
+			<div
+				role="radiogroup"
+				aria-label="Servicios disponibles"
+				className="grid gap-4 sm:grid-cols-2"
+			>
 				{barberServices.map((s) => (
 					<button
 						key={s.id}
+						role="radio"
+						aria-checked={selected === s.id}
+						aria-label={`Servicio: ${s.name}, ${formatPrice(s.price)}, ${s.duration} minutos`}
 						onClick={() => onSelect(s)}
-						className={`rounded-xl border bg-neutral-950 p-5 text-left transition-all ${
+						onKeyDown={(e) => handleKeyDown(e, s)}
+						className={`rounded-xl border bg-neutral-950 p-5 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 ${
 							selected === s.id
 								? "border-blue-500"
 								: "border-neutral-800 hover:border-neutral-600 hover:bg-neutral-900"

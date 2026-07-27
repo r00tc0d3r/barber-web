@@ -11,6 +11,20 @@ type Props = {
 	onBack: () => void;
 };
 
+function SlotSkeleton() {
+	return (
+		<div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+			{Array.from({ length: 8 }).map((_, i) => (
+				<div
+					key={i}
+					className="h-10 animate-pulse rounded-lg bg-neutral-800"
+					style={{ animationDelay: `${i * 50}ms` }}
+				/>
+			))}
+		</div>
+	);
+}
+
 export function DateTimeStep({
 	date,
 	time,
@@ -24,7 +38,7 @@ export function DateTimeStep({
 		<div>
 			<button
 				onClick={onBack}
-				className="mb-4 text-sm text-neutral-500 transition-colors hover:text-white"
+				className="mb-4 text-sm text-neutral-500 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950"
 			>
 				← Cambiar servicio
 			</button>
@@ -47,7 +61,10 @@ export function DateTimeStep({
 			</div>
 
 			{loading && (
-				<p className="text-sm text-neutral-500">Buscando horarios...</p>
+				<div aria-busy="true" aria-label="Cargando horarios disponibles">
+					<label className="mb-2 block text-sm text-neutral-400">Horario</label>
+					<SlotSkeleton />
+				</div>
 			)}
 
 			{!loading && date && slots.length === 0 && (
